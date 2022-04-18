@@ -59,7 +59,7 @@ fetch(endpoint_the_office)
                 let makeLi = document.createElement("li");
 
                 //Put the content inside the li
-                makeLi.innerHTML = `${dataFirstName} ${dataLastName} ${dataQuotes}`
+                makeLi.innerHTML = `${dataFirstName} ${dataLastName}. "${dataQuotes}"`
 
                 //Put in in the div
                 div.appendChild(makeLi);
