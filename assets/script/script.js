@@ -3,98 +3,80 @@ console.log("Be water my Friend");
 console.log("-----");
 
 //Beginning of the project
-//LES APIS 
-// const endpoint = 'https://gist.githubusercontent.com/Miserlou/c5cd8364bf9b2420bb29/raw/2bf258763cdddd704f8ffd3ea9a3e81d25e2c6f6/cities.json';
+//API 
 const endpoint_the_office = 'https://www.officeapi.dev/api/quotes/';
 
-//Les éléments HTML à sélectionner 
+//HTML elements  
 const div = document.querySelector(".suggestions");
-const input = document.querySelector(".search")
+const searchBar = document.querySelector(".search")
 
-/*Pseudo Code
-    2 Lier la barre de recherche et rendre recherche dynamique via l'url  
- */
-
-
-//TODO Vérifier comment récupérer des éléments en particulier dans la doc de l'api 
-// Le fetch reçoit les infos 
-fetch('https://www.officeapi.dev/api/quotes/')
-    //Puis on transforme en json()
-    .then(unAliasPourLaReponseQueMerenvoieMonAPI => {
-        return unAliasPourLaReponseQueMerenvoieMonAPI.json()
+// fetch is getting the data 
+fetch(endpoint_the_office)
+    //turn into a json()
+    .then(brutData => {
+        //brutData is an alias made up
+        return brutData.json()
     })
-    //On récupérer les data du json
-    .then(unAliasPourSesDonnées => {
-        //Conversion spécifique pour mon cas vu que c'est un object et non un tableau 
-        //TODO Essayer de réduire en une seule ligne   
-        unAliasPourSesDonnées = Object.values(unAliasPourSesDonnées)
-        unAliasPourSesDonnées = unAliasPourSesDonnées[0]
-        //FIN DU GOOD 
+    //get the json data
+    .then(cleanData => {
+        //get only the objet that I want 
+        cleanData = Object.values(cleanData)
+        cleanData = cleanData[0]
 
-        //MON IDEE
-        // //TODO Rendre dataQuotes dynamique 
-        // let dataQuotes = unAliasPourSesDonnées[0].content
-        // console.log('dataQuotes', dataQuotes)
-        // let dataFirstName = unAliasPourSesDonnées.character.firstname
-        // console.log('dataFirstName', dataFirstName)
-        // let dataLastName = unAliasPourSesDonnées.character.lastname
-        // console.log('dataLastName', dataLastName)
+        // uncomment : displayQuotes(cleanData) if you want to see all the quotes when the page is load 
+        // displayQuotes(cleanData)
 
-        //La ForEach de Tiff (fonctionne mais pas sûr d'en avoir besoin)
-        unAliasPourSesDonnées.forEach(values => {
+        //Listen to the searchBar
+        searchBar.addEventListener("input", searchQuotes)
 
-            //Sur la bonne voie continuer avec le appendChild !!!
-            let dataQuotes = values.content
-            let dataFirstName = values.character.firstname;
-            let dataLastName = values.character.lastname;
+        //Get the quotes where the letter of the input correspond to the name or last name of a character
+        function searchQuotes(e) {
+            //Set the beginning state 
+            div.innerHTML = `<ul class="suggestions">
+            <li id="theChosenOne">Quotes from the Office</li>
+            </ul>`;
 
-            const node = document.createElement("li");
+            //Get the value of the input 
+            const searchInput = e.target.value || "empty"
+            console.log("🤖 ~ file: script.js ~ line 41 ~ searchQuotes ~ searchInput", searchInput)
 
-            //Prénom du personage 
-            const innerFirstName = document.createTextNode(`${dataFirstName} `);
-            node.appendChild(innerFirstName);
+            //Condition of the research (in the firstname or in the lastname)
+            const searchArray = cleanData.filter(pseudo => pseudo.character.firstname.toLowerCase().includes(searchInput) || pseudo.character.lastname.toLowerCase().includes(searchInput))
 
+            //On every input use displayQuotes to display the good result 
+            displayQuotes(searchArray)
+        }
 
-            //Nom du personage
-            const innerLastName = document.createTextNode(`${dataLastName}. `);
-            node.appendChild(innerLastName);
-            div.appendChild(node);
+        //Display the Quotes on a li element with a forEach
+        function displayQuotes(quotes) {
+            quotes.forEach(quote => {
+                //First Name, Last Name and Quotes 
+                let dataQuotes = quote.content
+                let dataFirstName = quote.character.firstname;
+                let dataLastName = quote.character.lastname;
 
-            //Citation 
-            const innerQuotes = document.createTextNode(`${dataQuotes} `);
-            node.appendChild(innerQuotes);
+                //Create the li
+                let makeLi = document.createElement("li");
 
-        })
+                //Put the content inside the li
+                makeLi.innerHTML = `${dataFirstName} ${dataLastName} ${dataQuotes}`
+
+                //Put in in the div
+                div.appendChild(makeLi);
+            })
+        }
+        if (searchInput = "empty") {
+            div.innerHTML = `<ul class="suggestions">
+            <li id="theChosenOne">Quotes from the Office</li>
+            </ul>`;
+        }
     })
 
-
-
-
-
-//Caractéristique d'une citation
-//     0:
-// character: {_id: '5e93b4a43af44260882e33b0', firstname: 'Michael', lastname: 'Scott', __v: 0}
-// content: "If I had a gun with two bullets and I was in a room with Hitler, Bin Laden, and Toby, I would shoot Toby twice."
-// __v: 0
-// _id: "5e9664cff87ac15464c55f1b"
-
-
-//MAXIME PIE EXERCICE !!!
-// fetch(`https://api.thecatapi.com/v1/images/search?limit=${buttonNumber}&mime_types=gif&breed_ids=${idButton}`)
-// function displayCat() {
-//     // https://api.thecatapi.com/v1/images/search?limit=3&mime_types=${fileType}&breed_ids={$selectedBreed}
-//     // fetch(`https://api.thecatapi.com/v1/images/search?limit=3&mime_types=${fileType}`)
-//     fetch(`https://api.thecatapi.com/v1/images/search?breed_ids=beng`)
-//         .then(response => response.json())
-//         .then(function (catsData) {
-//             console.log(catsData);
-//             catsList.innerHTML = null;
-
-//             catsData.forEach(cat => {
-//                 const catImageElement = document.createElement("img");
-//                 catImageElement.src = cat.url;
-//                 catsList.appendChild(catImageElement);
-//             })
-//         })
+    // BONUS
+    //async fonction , (same result with Object.value)
+// async function getQuotes() {
+//     const res = await fetch("https://www.officeapi.dev/api/quotes/")
+//     const { data } = await res.json();
+//     console.log(data)
 // }
-//     console.log(displayCat())
+// getQuotes()
